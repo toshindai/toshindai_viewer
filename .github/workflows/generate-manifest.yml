@@ -50,3 +50,19 @@ jobs:
           git add images/**/manifest.json
           git diff --cached --quiet || git commit -m "Auto-generate manifest.json"
           git push
+
+      - name: Detect updated issue folder
+        id: detect_issue
+        run: |
+          ISSUE=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '^images/' | cut -d'/' -f2 | sort -u | head -n 1)
+          echo "issue=$ISSUE" >> $GITHUB_OUTPUT
+
+      - name: Notify Discord
+        if: steps.detect_issue.outputs.issue != ''
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          ISSUE: ${{ steps.detect_issue.outputs.issue }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"新しい号を更新しました: ${ISSUE}\nhttps://toshindai-vewer.vercel.app/?issue=${ISSUE}\"}" \
+            "$DISCORD_WEBHOOK_URL"
