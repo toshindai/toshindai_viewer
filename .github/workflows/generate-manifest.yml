@@ -1,4 +1,4 @@
-name: Generate manifests
+name: Generate manifests and notify Discord
 
 on:
   push:
@@ -64,5 +64,5 @@ jobs:
           ISSUE: ${{ steps.detect_issue.outputs.issue }}
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"content\":\"新しい号を更新しました: ${ISSUE}\nhttps://toshindai-vewer.vercel.app/?issue=${ISSUE}\"}" \
+            -d "{\"content\":\"新しい号を更新しました：${ISSUE}\nhttps://toshindai-vewer.vercel.app/?issue=${ISSUE}\"}" \
             "$DISCORD_WEBHOOK_URL"
