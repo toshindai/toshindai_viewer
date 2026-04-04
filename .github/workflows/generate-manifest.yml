@@ -68,5 +68,5 @@ jobs:
         run: |
           curl -X POST \
             -H "Content-Type: application/json" \
-            -d "{\"content\":\"新しい号を更新しました：${ISSUE}\nhttps://toshindai-vewer.vercel.app/?issue=${ISSUE}\"}" \
+            -d "{\"content\":\"新しい号を更新しました：${ISSUE}\nhttps://toshindai-viewer.vercel.app/?issue=${ISSUE}\"}" \
             "$DISCORD_WEBHOOK_URL"
