@@ -1,0 +1,52 @@
+name: Generate manifests
+
+on:
+  push:
+    paths:
+      - 'images/**'
+
+permissions:
+  contents: write
+
+jobs:
+  generate-manifests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate manifest.json for each issue folder
+        run: |
+          python <<'PY'
+          import os
+          import json
+
+          base_dir = "images"
+
+          if not os.path.isdir(base_dir):
+              raise SystemExit("images directory not found")
+
+          for issue in os.listdir(base_dir):
+              issue_path = os.path.join(base_dir, issue)
+              if not os.path.isdir(issue_path):
+                  continue
+
+              pages = []
+              for f in sorted(os.listdir(issue_path)):
+                  lower = f.lower()
+                  if lower.startswith("page") and lower.endswith(".jpg"):
+                      pages.append(f)
+
+              manifest_path = os.path.join(issue_path, "manifest.json")
+              with open(manifest_path, "w", encoding="utf-8") as fp:
+                  json.dump({"pages": pages}, fp, ensure_ascii=False, indent=2)
+          PY
+
+      - name: Commit manifest files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add images/**/manifest.json
+          git diff --cached --quiet || git commit -m "Auto-generate manifest.json"
+          git push
